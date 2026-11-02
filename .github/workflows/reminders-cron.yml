@@ -1,0 +1,23 @@
+name: Scheduled Debate Reminders Worker
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  trigger-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Debate Reminders Cron Endpoint
+        env:
+          APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -n "$APP_URL" ] && [ -n "$CRON_SECRET" ]; then
+            echo "Triggering reminders worker at $APP_URL/api/cron/reminders..."
+            curl -f -s -X GET "$APP_URL/api/cron/reminders" \
+              -H "Authorization: Bearer $CRON_SECRET"
+          else
+            echo "Note: Add NEXT_PUBLIC_APP_URL and CRON_SECRET to your GitHub Repo Secrets if you want automated 10-minute cron reminders."
+          fi
