@@ -54,15 +54,23 @@ export function Countdown({
 
   const pad = (n: number) => n.toString().padStart(2, "0");
 
+  const isUrgent = !timeLeft.isPast && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds <= 15 && timeLeft.seconds > 0;
+
   return (
     <div
       className={cn(
-        "inline-flex flex-col items-center rounded-lg bg-[#0B0D10] text-[#FFFFFF] px-4 py-2 border border-[#E4E0D8]",
+        "inline-flex flex-col items-center rounded-lg bg-[#0B0D10] text-[#FFFFFF] px-4 py-2 border border-[#E4E0D8] transition-all",
+        isUrgent && "border-[#D93A47] ring-1 ring-[#D93A47]/40",
         className
       )}
     >
       {label && (
-        <span className="text-[10px] uppercase font-bold tracking-widest text-[#C7F36B] mb-1">
+        <span
+          className={cn(
+            "text-[10px] uppercase font-bold tracking-widest mb-1",
+            isUrgent ? "text-[#D93A47] animate-pulse" : "text-[#C7F36B]"
+          )}
+        >
           {label}
         </span>
       )}
@@ -73,7 +81,13 @@ export function Countdown({
           <>
             {timeLeft.hours > 0 && <span>{pad(timeLeft.hours)}:</span>}
             <span>{pad(timeLeft.minutes)}:</span>
-            <span className="text-[#C7F36B]">{pad(timeLeft.seconds)}</span>
+            <span
+              className={cn(
+                isUrgent ? "text-[#D93A47] font-black animate-pulse" : "text-[#C7F36B]"
+              )}
+            >
+              {pad(timeLeft.seconds)}
+            </span>
           </>
         )}
       </div>

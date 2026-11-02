@@ -357,11 +357,18 @@ export function DebateRoomClient({
               className="border-t border-[#E4E0D8] p-4 bg-[#FFFFFF]"
             >
               <div className="flex items-center justify-between mb-1.5 text-xs">
-                <span className="font-semibold text-[#0B0D10]">Your Argument:</span>
+                <span className="font-semibold text-[#0B0D10] flex items-center gap-2">
+                  Your Argument
+                  <span className="hidden sm:inline text-[10px] text-[#5B6472] font-normal">
+                    (Ctrl + Enter to send)
+                  </span>
+                </span>
                 <span
                   className={
                     charsLeft < 0
                       ? "text-[#D93A47] font-bold"
+                      : charsLeft < 25
+                      ? "text-[#D93A47] font-semibold"
                       : "text-[#5B6472]"
                   }
                 >
@@ -373,7 +380,15 @@ export function DebateRoomClient({
                   rows={2}
                   value={inputContent}
                   onChange={(e) => setInputContent(e.target.value)}
-                  placeholder="Type your rebuttal or statement here..."
+                  onKeyDown={(e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                      e.preventDefault();
+                      if (inputContent.trim() && charsLeft >= 0 && !isPending) {
+                        handleSendMessage(e);
+                      }
+                    }
+                  }}
+                  placeholder="Type your rebuttal or statement here... (Ctrl+Enter to send)"
                   maxLength={maxChars}
                   className="flex-1 rounded-md border border-[#E4E0D8] bg-[#FAF8F4] p-2.5 text-sm text-[#0B0D10] focus:outline-none focus:ring-2 focus:ring-[#0B0D10]"
                 />
@@ -382,6 +397,7 @@ export function DebateRoomClient({
                   variant="primary"
                   disabled={isPending || !inputContent.trim() || charsLeft < 0}
                   className="font-bold shrink-0 self-end h-10 px-4"
+                  title="Submit argument (Ctrl+Enter)"
                 >
                   <Send className="h-4 w-4" />
                 </Button>

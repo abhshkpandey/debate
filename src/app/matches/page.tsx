@@ -103,10 +103,23 @@ export default async function MatchesPage() {
                           View Calendar & Schedule
                         </Button>
                       </Link>
+                    ) : m.status === "completed" ? (
+                      <div className="flex items-center gap-2 w-full">
+                        <Link href={`/debate/${m.challenge_id}`} className="flex-1">
+                          <Button variant="outline" size="sm" className="w-full text-xs">
+                            View Verdict
+                          </Button>
+                        </Link>
+                        <Link href={`/debate-room/${m.id}`} className="flex-1">
+                          <Button variant="secondary" size="sm" className="w-full text-xs font-bold">
+                            Transcript
+                          </Button>
+                        </Link>
+                      </div>
                     ) : (
                       <Link href={`/debate-room/${m.id}`} className="w-full">
-                        <Button variant="outline" size="sm" className="w-full">
-                          Debate Arena
+                        <Button variant="primary" size="sm" className="w-full font-bold">
+                          Enter Live Arena
                         </Button>
                       </Link>
                     )}
