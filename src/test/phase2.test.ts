@@ -134,6 +134,18 @@ describe("Phase 2: Challenges, Invites, Atomic Accept & Safety", () => {
       const canSecondUserClaim = currentStatus === "open";
       expect(canSecondUserClaim).toBe(false);
     });
+
+    it("should allow leaving the opposing stance blank and auto-assign default counter-stance", () => {
+      const rawA = "Pro-remote work: higher focus and autonomy";
+      const rawB = ""; // Opposing side left blank by creator
+      const creatorSide = "a";
+
+      const finalPositionA = rawA || "In favor / Proposition stance (open for challenger)";
+      const finalPositionB = rawB || "Opposing counter-stance (open for challenger)";
+
+      expect(finalPositionA).toBe("Pro-remote work: higher focus and autonomy");
+      expect(finalPositionB).toBe("Opposing counter-stance (open for challenger)");
+    });
   });
 
   describe("Blocking Enforcement", () => {

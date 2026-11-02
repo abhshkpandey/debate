@@ -27,11 +27,11 @@ export function ChallengeCreateWizard() {
 
   // Step 1 validation
   const isStep1Valid = title.trim().length >= 5 && title.length <= 120;
-  // Step 2 validation
+  // Step 2 validation: Only your chosen side is mandatory (at least 3 characters)
   const isStep2Valid =
-    positionA.trim().length >= 3 &&
-    positionB.trim().length >= 3 &&
-    (creatorSide === "a" || creatorSide === "b");
+    creatorSide === "a"
+      ? positionA.trim().length >= 3
+      : positionB.trim().length >= 3;
   // Step 3 validation
   const isStep3Valid = description.trim().length >= 10 && description.length <= 2000;
 
@@ -240,10 +240,14 @@ export function ChallengeCreateWizard() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Side A */}
-              <div className="space-y-2 rounded-xl border border-[#E4E0D8] bg-[#FAF8F4] p-4">
+              <div className={`space-y-2 rounded-xl border p-4 transition-all ${
+                creatorSide === "a"
+                  ? "border-[#0B0D10] bg-[#FFFFFF] ring-1 ring-[#0B0D10]"
+                  : "border-[#E4E0D8] bg-[#FAF8F4]"
+              }`}>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider text-[#0B0D10]">
-                    Side A Position *
+                    Side A Position {creatorSide === "a" ? "* (Your Stance)" : "(Optional - Opposing Stance)"}
                   </span>
                   <label className="flex items-center gap-1.5 text-xs font-bold text-[#0B0D10] cursor-pointer">
                     <input
@@ -259,19 +263,32 @@ export function ChallengeCreateWizard() {
                 <textarea
                   value={positionA}
                   onChange={(e) => setPositionA(e.target.value)}
-                  placeholder="e.g. Distributed engineering teams have higher autonomy, deeper focus time, and produce higher architectural quality."
+                  placeholder={
+                    creatorSide === "a"
+                      ? "e.g. Distributed engineering teams have higher autonomy, deeper focus time, and produce higher architectural quality."
+                      : "Optional: Suggest the counter-stance, or leave blank for your opponent to define..."
+                  }
                   rows={2}
                   maxLength={300}
                   className="w-full rounded-md border border-[#E4E0D8] bg-[#FFFFFF] px-3.5 py-2.5 text-sm text-[#0B0D10] focus:outline-none focus:ring-2 focus:ring-[#0B0D10]"
                 />
-                <span className="text-[11px] text-[#5B6472]">{positionA.length}/300 chars</span>
+                <div className="flex items-center justify-between text-[11px] text-[#5B6472]">
+                  <span>{positionA.length}/300 chars</span>
+                  {creatorSide !== "a" && !positionA.trim() && (
+                    <span className="italic text-[#5B6472]/80">Defaults to open counter-stance if blank</span>
+                  )}
+                </div>
               </div>
 
               {/* Side B */}
-              <div className="space-y-2 rounded-xl border border-[#E4E0D8] bg-[#FAF8F4] p-4">
+              <div className={`space-y-2 rounded-xl border p-4 transition-all ${
+                creatorSide === "b"
+                  ? "border-[#0B0D10] bg-[#FFFFFF] ring-1 ring-[#0B0D10]"
+                  : "border-[#E4E0D8] bg-[#FAF8F4]"
+              }`}>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider text-[#0B0D10]">
-                    Side B Position * (Opposing Stance)
+                    Side B Position {creatorSide === "b" ? "* (Your Stance)" : "(Optional - Opposing Stance)"}
                   </span>
                   <label className="flex items-center gap-1.5 text-xs font-bold text-[#0B0D10] cursor-pointer">
                     <input
@@ -287,12 +304,21 @@ export function ChallengeCreateWizard() {
                 <textarea
                   value={positionB}
                   onChange={(e) => setPositionB(e.target.value)}
-                  placeholder="e.g. Colocated teams communicate with far lower latency, mentor junior engineers faster, and build higher interpersonal cohesion."
+                  placeholder={
+                    creatorSide === "b"
+                      ? "e.g. Colocated teams communicate with far lower latency, mentor junior engineers faster, and build higher interpersonal cohesion."
+                      : "Optional: Suggest the opposing counter-stance, or leave blank for your opponent to define..."
+                  }
                   rows={2}
                   maxLength={300}
                   className="w-full rounded-md border border-[#E4E0D8] bg-[#FFFFFF] px-3.5 py-2.5 text-sm text-[#0B0D10] focus:outline-none focus:ring-2 focus:ring-[#0B0D10]"
                 />
-                <span className="text-[11px] text-[#5B6472]">{positionB.length}/300 chars</span>
+                <div className="flex items-center justify-between text-[11px] text-[#5B6472]">
+                  <span>{positionB.length}/300 chars</span>
+                  {creatorSide !== "b" && !positionB.trim() && (
+                    <span className="italic text-[#5B6472]/80">Defaults to open counter-stance if blank</span>
+                  )}
+                </div>
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">

@@ -26,12 +26,14 @@ const createChallengeSchema = z.object({
   }, "Invalid category"),
   position_a: z
     .string()
-    .min(3, "Side A stance must be at least 3 characters")
-    .max(300, "Side A stance cannot exceed 300 characters"),
+    .max(300, "Side A stance cannot exceed 300 characters")
+    .optional()
+    .nullable(),
   position_b: z
     .string()
-    .min(3, "Side B stance must be at least 3 characters")
-    .max(300, "Side B stance cannot exceed 300 characters"),
+    .max(300, "Side B stance cannot exceed 300 characters")
+    .optional()
+    .nullable(),
   creator_side: z.enum(["a", "b"], {
     message: "You must choose either Side A or Side B",
   }),
@@ -41,7 +43,18 @@ const createChallengeSchema = z.object({
   language: z.string().default("en"),
   visibility: z.enum(["public", "invite_only"]),
   deadline_days: z.string().optional(),
-});
+}).refine(
+  (data) => {
+    if (data.creator_side === "a") {
+      return !!data.position_a && data.position_a.trim().length >= 3;
+    }
+    return !!data.position_b && data.position_b.trim().length >= 3;
+  },
+  {
+    message: "Stance is required for your chosen side (at least 3 characters)",
+    path: ["position_a"],
+  }
+);
 
 export type ChallengeActionState = {
   success?: boolean;
@@ -135,6 +148,17 @@ export async function createChallengeAction(
   const inviteCode = generateInviteCode();
   const challengeId = `chl_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
+  const rawA = position_a?.trim();
+  const rawB = position_b?.trim();
+  const finalPositionA =
+    rawA && rawA.length > 0
+      ? rawA
+      : "In favor / Proposition stance (open for challenger)";
+  const finalPositionB =
+    rawB && rawB.length > 0
+      ? rawB
+      : "Opposing counter-stance (open for challenger)";
+
   if (isDevFallbackActive) {
     const newChallenge: Challenge = {
       id: challengeId,
@@ -142,8 +166,8 @@ export async function createChallengeAction(
       title,
       description,
       category,
-      position_a,
-      position_b,
+      position_a: finalPositionA,
+      position_b: finalPositionB,
       creator_side,
       format,
       language,
@@ -172,8 +196,8 @@ export async function createChallengeAction(
       title,
       description,
       category,
-      position_a,
-      position_b,
+      position_a: finalPositionA,
+      position_b: finalPositionB,
       creator_side,
       format,
       language,
