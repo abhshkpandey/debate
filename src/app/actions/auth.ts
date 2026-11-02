@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { isDevFallbackActive } from "@/lib/env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/service";
 import { memoryStore } from "@/lib/db/store";
 import { isValidIanaTimeZone } from "@/lib/date/timezone";
 import { checkRateLimit } from "@/lib/security/rate-limit";
@@ -131,15 +132,19 @@ export async function signUpAction(_prevState: ActionState, formData: FormData):
     return { error: authError?.message ?? "Failed to create account" };
   }
 
-  // Create initial profile row
-  const { error: profileError } = await supabase.from("profiles").insert({
-    id: authData.user.id,
-    username,
-    display_name,
-    timezone,
-    is_public: true,
-    is_admin: false,
-  });
+  // Create or initialize profile row using service role client to bypass RLS during signup
+  const adminClient = createServiceRoleClient() ?? supabase;
+  const { error: profileError } = await adminClient.from("profiles").upsert(
+    {
+      id: authData.user.id,
+      username,
+      display_name,
+      timezone,
+      is_public: true,
+      is_admin: false,
+    },
+    { onConflict: "id" }
+  );
 
   if (profileError) {
     return { error: "Created user account but failed to initialize profile: " + profileError.message };
